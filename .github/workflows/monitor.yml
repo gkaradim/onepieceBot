@@ -1,0 +1,42 @@
+name: OP TCG stock monitor
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: op-tcg-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run monitor
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WATCH_CODES: ${{ vars.WATCH_CODES }}
+        run: python monitor.py
+
+      - name: Commit updated state
+        run: |
+          git config user.name "op-tcg-monitor"
+          git config user.email "actions@github.com"
+          git add state.json
+          if ! git diff --cached --quiet; then
+            git commit -m "update state [skip ci]"
+            git push
+          fi
