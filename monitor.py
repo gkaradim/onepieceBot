@@ -221,17 +221,47 @@ def send_telegram(text):
         print("!! Telegram not configured, printing instead:\n" + text + "\n")
         return
     r = cf.post(f"https://api.telegram.org/bot{token}/sendMessage",
-                json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
+                json={"chat_id": chat_id, "text": text, "parse_mode": "HTML",
+                      "disable_web_page_preview": True},  # no big link previews
                 impersonate="chrome", timeout=30)
     if not r.ok:
         print(f"!! Telegram error {r.status_code}: {r.text}")
+
+
+def price_value(p):
+    """Parse '139,99€' / '140,00 €' -> float, for finding the cheapest store."""
+    m = re.search(r"[\d.,]+", p or "")
+    if not m:
+        return None
+    s = m.group(0)
+    s = s.replace(".", "").replace(",", ".") if ("," in s and "." in s) else s.replace(",", ".")
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def buy_section(code, current, by_code):
+    """Where-to-buy block for a set code. If 2+ stores have it orderable, show a
+    price comparison with 🏆 on the cheapest; else a single link."""
+    orderable = sorted(by_code.get(code, []), key=lambda x: (price_value(x["price"]) or 1e12))
+    if len(orderable) >= 2:
+        out = ["", "💰 Σύγκριση:"]
+        for i, e in enumerate(orderable):
+            out.append(f"{'🏆 ' if i == 0 else ''}{e['store']} — {e['price']}\n🛒 {e['url']}")
+        return "\n".join(out)
+    if len(orderable) == 1:
+        e = orderable[0]
+        return f"\n💶 {e['price']} · {e['store']}\n🛒 {e['url']}"
+    e = current  # nothing orderable (e.g. new sold-out) -> show the item's own price/link
+    return f"\n💶 {e['price']} · {e['store']}\n🛒 {e['url']}"
 
 
 def main():
     prev = load_state()
     first_run = not prev  # empty state -> seed silently, no notification burst
     new_state = {}
-    messages = []
+    all_tracked = []
 
     for store in STORES:
         try:
@@ -240,37 +270,14 @@ def main():
             print(f"!! {store['name']} failed: {e}")
             new_state.update({k: v for k, v in prev.items() if v.get("store") == store["name"]})
             continue
-
         tracked = [it for it in items if is_tracked(it)]
         print(f"{store['name']}: {len(items)} items, {len(tracked)} tracked boxes")
-
         for it in tracked:
-            key = it["url"]
-            new_state[key] = {k: it[k] for k in ("store", "name", "code", "price", "status", "release")}
-            old = prev.get(key)
-            emoji, label = STATUS_EMOJI.get(it["status"], ""), STATUS_GR[it["status"]]
-            rel = f" — release {it['release']}" if it["release"] else ""
-
-            if old is None:
-                messages.append(
-                    f"🆕 <b>{it['name']}</b>\n{emoji} {label} — {it['price']}{rel}\n"
-                    f"🛒 {it['store']}: {it['url']}")
-            elif old["status"] != it["status"]:
-                became_orderable = old["status"] == SOLD_OUT and it["status"] != SOLD_OUT
-                head = "🟢 ΔΙΑΘΕΣΙΜΟ" if became_orderable else "🔔 Αλλαγή"
-                messages.append(
-                    f"{head} <b>{it['name']}</b>\n"
-                    f"{STATUS_EMOJI.get(old['status'],'')} {STATUS_GR[old['status']]} → {emoji} {label}\n"
-                    f"{it['price']}{rel}\n🛒 {it['store']}: {it['url']}")
-            elif old.get("price") != it["price"] and it["price"]:
-                messages.append(
-                    f"💶 Αλλαγή τιμής <b>{it['name']}</b>\n{old.get('price')} → {it['price']}\n"
-                    f"🛒 {it['store']}: {it['url']}")
+            new_state[it["url"]] = {k: it[k] for k in ("store", "name", "code", "price", "status", "release")}
+            all_tracked.append(it)
         time.sleep(1)
 
     if first_run:
-        # Seed silently, but send ONE digest of what is orderable right now, so
-        # you immediately see e.g. "OP-19 pre-order open" without waiting for a change.
         orderable = sorted(((k, v) for k, v in new_state.items() if v["status"] != SOLD_OUT),
                            key=lambda kv: (kv[1]["store"], kv[1]["code"] or ""))
         if orderable:
@@ -283,6 +290,40 @@ def main():
         save_state(new_state)
         print(f"First run: seeded {len(new_state)} products; digest of {len(orderable)} orderable sent.")
         return 0
+
+    # price-comparison map: code -> list of orderable items across all stores
+    by_code = {}
+    for it in all_tracked:
+        if it["status"] != SOLD_OUT:
+            by_code.setdefault(it["code"], []).append(it)
+
+    messages, notified = [], set()  # notified: codes already alerted as orderable this run
+    for it in all_tracked:
+        old = prev.get(it["url"])
+        emoji, label = STATUS_EMOJI.get(it["status"], ""), STATUS_GR[it["status"]]
+        rel = f" — release {it['release']}" if it["release"] else ""
+        orderable_event = ((old is None or old["status"] == SOLD_OUT) and it["status"] != SOLD_OUT)
+        if orderable_event and it["code"] in notified:
+            continue  # avoid duplicate messages for the same set in one run
+
+        if old is None:
+            messages.append(f"🆕 <b>{it['name']}</b>\n{emoji} {label} — {it['price']}{rel}"
+                            + buy_section(it["code"], it, by_code))
+        elif old["status"] != it["status"]:
+            head = "🟢 ΔΙΑΘΕΣΙΜΟ" if orderable_event else "🔔 Αλλαγή"
+            messages.append(f"{head} <b>{it['name']}</b>\n"
+                            f"{STATUS_EMOJI.get(old['status'],'')} {STATUS_GR[old['status']]} → {emoji} {label}{rel}"
+                            + buy_section(it["code"], it, by_code))
+        elif old.get("release") != it["release"] and it["release"]:
+            messages.append(f"📅 <b>{it['code']}</b> — ημ/νία κυκλοφορίας: "
+                            f"{old.get('release') or '—'} → {it['release']}\n🛒 {it['store']}: {it['url']}")
+        elif old.get("price") != it["price"] and it["price"]:
+            messages.append(f"💶 Αλλαγή τιμής <b>{it['name']}</b>\n{old.get('price')} → {it['price']}"
+                            + buy_section(it["code"], it, by_code))
+        else:
+            continue
+        if orderable_event:
+            notified.add(it["code"])
 
     for msg in messages:
         send_telegram(msg)
