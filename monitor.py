@@ -353,22 +353,24 @@ def main():
         if it["status"] != SOLD_OUT:
             by_code.setdefault(it["code"], []).append(it)
 
-    messages, notified = [], set()  # notified: codes already alerted as orderable this run
+    # Notify ONLY about available boxes. Sold-out items are recorded in the state
+    # silently (so we can alert the moment they become available), never messaged.
+    messages, notified = [], set()
     for it in all_tracked:
+        if it["status"] == SOLD_OUT:
+            continue
         old = prev.get(it["url"])
         emoji, label = STATUS_EMOJI.get(it["status"], ""), STATUS_GR[it["status"]]
         rel = f" — release {it['release']}" if it["release"] else ""
-        orderable_event = ((old is None or old["status"] == SOLD_OUT) and it["status"] != SOLD_OUT)
-        if orderable_event and it["code"] in notified:
-            continue  # avoid duplicate messages for the same set in one run
+        just_available = old is None or old["status"] == SOLD_OUT
+        if just_available and it["code"] in notified:
+            continue  # one message per set per run
 
         if old is None:
             messages.append(f"🆕 <b>{it['name']}</b>\n{emoji} {label} — {it['price']}{rel}"
                             + buy_section(it["code"], it, by_code))
-        elif old["status"] != it["status"]:
-            head = "🟢 ΔΙΑΘΕΣΙΜΟ" if orderable_event else "🔔 Αλλαγή"
-            messages.append(f"{head} <b>{it['name']}</b>\n"
-                            f"{STATUS_EMOJI.get(old['status'],'')} {STATUS_GR[old['status']]} → {emoji} {label}{rel}"
+        elif old["status"] == SOLD_OUT:
+            messages.append(f"🟢 ΔΙΑΘΕΣΙΜΟ <b>{it['name']}</b>\n{emoji} {label} — {it['price']}{rel}"
                             + buy_section(it["code"], it, by_code))
         elif old.get("release") != it["release"] and it["release"]:
             messages.append(f"📅 <b>{it['code']}</b> — ημ/νία κυκλοφορίας: "
@@ -378,7 +380,7 @@ def main():
                             + buy_section(it["code"], it, by_code))
         else:
             continue
-        if orderable_event:
+        if just_available:
             notified.add(it["code"])
 
     for msg in messages:
