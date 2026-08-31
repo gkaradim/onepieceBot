@@ -27,7 +27,10 @@ STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 
 # Track only OP (main sets) and EB (extra boosters) BOXES - not singles, packs,
 # starter decks, double packs or illustration boxes.
-TRACK_PREFIXES = ("OP", "EB")
+TRACK_PREFIXES = ("OP", "EB", "PRB")
+
+# Only English boxes: skip anything flagged as Japanese / non-English / Asia-region.
+EXCLUDE_PATTERN = re.compile(r"japanese|japan|\bjp\b|non[-\s]?english|asia[-\s]region|asian", re.I)
 
 # A tracked product's name must contain one of these "box" hints. Stores word it
 # very differently, so we cover them all (incl. Greek "Κουτί"):
@@ -44,7 +47,7 @@ QUARTER_RE = re.compile(r"Q[1-4],?\s*20\d\d", re.I)
 
 # Ignore old sets: track OP only from 17 up, EB only from 06 up. (Overridden if
 # WATCH_CODES is set.) Change these numbers to widen/narrow the range.
-MIN_SET = {"OP": 17, "EB": 6}
+MIN_SET = {"OP": 17, "EB": 6, "PRB": 3}
 
 # Optional: only alert for these exact codes, e.g. "OP-20,EB-06". Empty = use the
 # MIN_SET ranges above for all OP/EB boxes.
@@ -109,12 +112,13 @@ def parse_efantasy(html, base, store):
     return items
 
 
-def parse_woodmart(html, base, store):
-    """WooCommerce / WoodMart theme (animeworld, rollntrade). Stock is encoded in
-    the product card's CSS class: instock / onbackorder / outofstock."""
+def parse_woocommerce(html, base, store):
+    """Any WooCommerce shop (animeworld, rollntrade, mythicvault). Stock is encoded
+    in the product card's CSS class: instock / onbackorder / outofstock. Handles
+    both li.product (standard) and div.product.product-grid-item (WoodMart)."""
     soup = BeautifulSoup(html, "html.parser")
     items = []
-    for el in soup.select("div.product.product-grid-item"):
+    for el in soup.select("li.product, div.product"):
         classes = el.get("class", [])
         if "outofstock" in classes:
             status = SOLD_OUT
@@ -124,9 +128,11 @@ def parse_woodmart(html, base, store):
             status = IN_STOCK
         else:
             continue
-        title = el.select_one(".wd-entities-title")
+        title = el.select_one(".wd-entities-title, .woocommerce-loop-product__title, h2, h3")
         name = clean(title.get_text(" ", strip=True)) if title else ""
-        link = el.select_one("a.wd-product-img-link") or (title.find("a") if title else None)
+        link = (el.select_one("a.wd-product-img-link, a.woocommerce-LoopProduct-link")
+                or (title.find_parent("a") if title else None)
+                or el.find("a", href=True))
         price_el = el.select_one(".price")
         items.append({
             "store": store, "name": name,
@@ -138,19 +144,54 @@ def parse_woodmart(html, base, store):
     return items
 
 
+def parse_cardshive(html, base, store):
+    """OpenCart shop (cardshive). The listing does NOT expose stock status, so we
+    track presence: a listed box is treated as available. (No reliable sold-out
+    detection here - see README.)"""
+    soup = BeautifulSoup(html, "html.parser")
+    items, seen = [], set()
+    for el in soup.select(".product-thumb"):
+        link = el.select_one(".caption .name a, .name a, .caption a")
+        if not link:
+            continue
+        url = urllib.parse.urljoin(base, link.get("href", ""))
+        if url in seen:
+            continue
+        seen.add(url)
+        name = clean(link.get_text(" ", strip=True))
+        price_el = el.select_one(".price-new") or el.select_one(".price")
+        price = clean(price_el.get_text(" ")) if price_el else ""
+        m = re.search(r"[\d.,]+\s*€", price)
+        items.append({
+            "store": store, "name": name, "url": url,
+            "code": extract_code(name),
+            "price": m.group(0).replace(" ", "") if m else price,
+            "status": IN_STOCK, "release": "",
+        })
+    return items
+
+
 STORES = [
     # eFantasy shows the whole One Piece category on a single page -> no pagination.
     {"name": "eFantasy", "parser": parse_efantasy, "paginate": False,
      "url": "https://www.efantasy.gr/en/products/card-games/sc-2183-one-piece-card-game/sort=id-desc"},
     # WooCommerce archives split products across pages (/page/2/, /page/3/ ...),
     # so we must follow every page - the boxes can be on any of them.
-    {"name": "AnimeWorld", "parser": parse_woodmart, "paginate": True,
+    {"name": "AnimeWorld", "parser": parse_woocommerce, "paginate": True,
      "url": "https://animeworld.gr/brand/one-piece-tcg/"},
-    {"name": "RollnTrade", "parser": parse_woodmart, "paginate": True,
+    {"name": "RollnTrade", "parser": parse_woocommerce, "paginate": True,
      "url": "https://rollntrade.com/el/product-category/paichnidia-karton-el/one-piece-paichnidi-karton-synallagon/"},
-    # MythicVault is left out: it runs an aggressive Cloudflare "managed challenge"
-    # that blocks curl_cffi AND headless browsers, so it cannot be scraped for free
-    # from a GitHub Actions IP. See README.
+    # MythicVault: WooCommerce behind Cloudflare, but curl_cffi gets through.
+    # Use the "sealed boxes" sub-category (boxes only).
+    # MythicVault: use the CATEGORY price (the public price a normal visitor sees).
+    # Do NOT read the product page price - a membership plugin (pmpro) puts a hidden
+    # member-only price there that regular buyers never get.
+    {"name": "MythicVault", "parser": parse_woocommerce, "paginate": True,
+     "url": "https://mythicvault.com/el/product-category/trading-card-games-el/paichnidi-karton-one-piece/sfragismena-koutia-el-3-2/"},
+    # CardsHive: OpenCart. Listing does not expose stock -> presence-based (status
+    # assumed available). Pagination uses ?page=N (query), not /page/N/.
+    {"name": "CardsHive", "parser": parse_cardshive, "paginate": True, "page_style": "query",
+     "url": "https://www.cardshive.gr/tcg/tcg-boxes/one-piece-boxes/"},
 ]
 
 
@@ -166,14 +207,25 @@ def fetch(url):
     return r.text
 
 
+def page_url(store, n):
+    """Build the URL for page n. WooCommerce uses /page/N/ (path); OpenCart uses
+    ?page=N (query)."""
+    base = store["url"]
+    if n == 1:
+        return base
+    if store.get("page_style") == "query":
+        return f"{base}{'&' if '?' in base else '?'}page={n}"
+    return f"{base}page/{n}/"
+
+
 def scrape(store, max_pages=20):
-    """Fetch a store's products. For paginated (WooCommerce) stores, follow every
-    /page/N/ until a page brings nothing new (or 404s)."""
+    """Fetch a store's products. For paginated stores, follow every page until one
+    brings nothing new (or 404s)."""
     if not store.get("paginate"):
         return store["parser"](fetch(store["url"]), store["url"], store["name"])
-    base, items, seen = store["url"], [], set()
+    items, seen = [], set()
     for n in range(1, max_pages + 1):
-        url = base if n == 1 else f"{base}page/{n}/"
+        url = page_url(store, n)
         try:
             page = store["parser"](fetch(url), url, store["name"])
         except Exception:
@@ -191,6 +243,8 @@ def is_tracked(item):
     code = item["code"] or ""
     if not code.startswith(TRACK_PREFIXES):
         return False
+    if EXCLUDE_PATTERN.search(item["name"]):
+        return False  # English boxes only
     if not BOX_HINT.search(item["name"]):
         return False
     if WATCH_CODES:
@@ -273,6 +327,8 @@ def main():
         tracked = [it for it in items if is_tracked(it)]
         print(f"{store['name']}: {len(items)} items, {len(tracked)} tracked boxes")
         for it in tracked:
+            if it["url"] in new_state:
+                continue  # de-dup same product listed twice on a page
             new_state[it["url"]] = {k: it[k] for k in ("store", "name", "code", "price", "status", "release")}
             all_tracked.append(it)
         time.sleep(1)
