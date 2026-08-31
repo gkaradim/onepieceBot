@@ -27,7 +27,7 @@ STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 
 # Track only OP (main sets) and EB (extra boosters) BOXES - not singles, packs,
 # starter decks, double packs or illustration boxes.
-TRACK_PREFIXES = ("OP", "EB", "PRB")
+TRACK_PREFIXES = ("OP", "EB", "PRB", "DP")
 
 # Only English boxes: skip anything flagged as Japanese / non-English / Asia-region.
 EXCLUDE_PATTERN = re.compile(r"japanese|japan|\bjp\b|non[-\s]?english|asia[-\s]region|asian", re.I)
@@ -37,7 +37,7 @@ EXCLUDE_PATTERN = re.compile(r"japanese|japan|\bjp\b|non[-\s]?english|asia[-\s]r
 #   eFantasy   "OP-20 Booster Box (24 packs)"
 #   AnimeWorld "Box One Piece Card Game [OP18] (ENG)"
 #   RollnTrade "OP-17 ... Booster Κουτί (24 Πακέτα)"
-BOX_HINT = re.compile(r"\bbox\b|κουτ|\(24\s*(?:packs|πακ)|booster\s*box|display", re.I)
+BOX_HINT = re.compile(r"\bbox\b|κουτ|\(24\s*(?:packs|πακ)|booster\s*box|display|double\s*pack", re.I)
 
 # Matches every wording of a set code, upper/lower, with/without dash/zeros/brackets:
 # OP18 OP-18 op 18 [OP18] (OP18) EB6 EB06 eb-06 ... numbers up to 999 (future-proof).
@@ -47,7 +47,7 @@ QUARTER_RE = re.compile(r"Q[1-4],?\s*20\d\d", re.I)
 
 # Ignore old sets: track OP only from 17 up, EB only from 06 up. (Overridden if
 # WATCH_CODES is set.) Change these numbers to widen/narrow the range.
-MIN_SET = {"OP": 17, "EB": 6, "PRB": 3}
+MIN_SET = {"OP": 17, "EB": 6, "PRB": 3, "DP": 12}
 
 # Optional: only alert for these exact codes, e.g. "OP-20,EB-06". Empty = use the
 # MIN_SET ranges above for all OP/EB boxes.
