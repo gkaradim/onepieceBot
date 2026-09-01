@@ -62,37 +62,5 @@
   "release": "",
   "status": "IN_STOCK",
   "store": "CardsHive"
- },
- "https://www.efantasy.gr/en/products/card-games/409257-one-piece-card-game-op-18-booster-box-24-packs": {
-  "code": "OP-18",
-  "name": "One Piece Card Game - OP-18 Booster Box (24 packs)",
-  "price": "139,99€",
-  "release": "Q4, 2026",
-  "status": "SOLD_OUT",
-  "store": "eFantasy"
- },
- "https://www.efantasy.gr/en/products/card-games/413898-one-piece-card-game-eb-06-booster-box-24-packs": {
-  "code": "EB-06",
-  "name": "One Piece Card Game - EB-06 Booster Box (24 packs)",
-  "price": "139,99€",
-  "release": "Q1, 2027",
-  "status": "SOLD_OUT",
-  "store": "eFantasy"
- },
- "https://www.efantasy.gr/en/products/card-games/425392-one-piece-card-game-op-19-booster-box-24-packs": {
-  "code": "OP-19",
-  "name": "One Piece Card Game - OP-19 Booster Box (24 packs)",
-  "price": "139,99€",
-  "release": "Q1, 2027",
-  "status": "SOLD_OUT",
-  "store": "eFantasy"
- },
- "https://www.efantasy.gr/en/products/card-games/425395-one-piece-card-game-op-20-booster-box-24-packs": {
-  "code": "OP-20",
-  "name": "One Piece Card Game - OP-20 Booster Box (24 packs)",
-  "price": "139,99€",
-  "release": "Q4, 2027",
-  "status": "SOLD_OUT",
-  "store": "eFantasy"
  }
 }
