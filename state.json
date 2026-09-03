@@ -39,6 +39,22 @@
   "status": "PREORDER_OPEN",
   "store": "AnimeWorld"
  },
+ "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-double-pack-dp11-en-copy/": {
+  "code": "DP-12",
+  "name": "One Piece Card Game Double Pack DP12 – EN",
+  "price": "24,99 €",
+  "release": "",
+  "status": "SOLD_OUT",
+  "store": "MythicVault"
+ },
+ "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-op16-the-time-of-battle-booster-box-24-packs-copy-2/": {
+  "code": "OP-17",
+  "name": "One Piece Card Game – The World’s Strongest Warriors OP17 Booster Box (24 Packs)",
+  "price": "199,99 €",
+  "release": "",
+  "status": "SOLD_OUT",
+  "store": "MythicVault"
+ },
  "https://www.cardshive.gr/tcg/tcg-boxes/one-piece-boxes/one-piece-op17-the-worlds-strongest-warriors-booster-box": {
   "code": "OP-17",
   "name": "One Piece OP17 - The World's Strongest Warriors Booster Box",
