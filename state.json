@@ -7,6 +7,14 @@
   "status": "SOLD_OUT",
   "store": "AnimeWorld"
  },
+ "https://animeworld.gr/product/box-one-piece-card-game-extra-booster-eb-05-eng/": {
+  "code": "EB-05",
+  "name": "Box One Piece Card Game Extra Booster EB-05 (ENG)",
+  "price": "140,00 €",
+  "release": "",
+  "status": "SOLD_OUT",
+  "store": "AnimeWorld"
+ },
  "https://animeworld.gr/product/box-one-piece-card-game-op18-eng/": {
   "code": "OP-18",
   "name": "Box One Piece Card Game [OP18] (ENG)",
@@ -39,6 +47,14 @@
   "status": "PREORDER_OPEN",
   "store": "AnimeWorld"
  },
+ "https://animeworld.gr/product/one-piece-card-game-premium-card-collection-best-selection-vol-7-eng-2/": {
+  "code": null,
+  "name": "One Piece Card Game Premium Card Collection Best Selection Vol.7 (ENG)",
+  "price": "54,93 €",
+  "release": "",
+  "status": "PREORDER_OPEN",
+  "store": "AnimeWorld"
+ },
  "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-double-pack-dp11-en-copy/": {
   "code": "DP-12",
   "name": "One Piece Card Game Double Pack DP12 – EN",
@@ -62,5 +78,101 @@
   "release": "",
   "status": "IN_STOCK",
   "store": "CardsHive"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/407019-one-piece-card-game-eb-05-booster-box-24-packs": {
+  "code": "EB-05",
+  "name": "One Piece Card Game - EB-05 Booster Box (24 packs)",
+  "price": "139,99€",
+  "release": "Q4, 2026",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/409257-one-piece-card-game-op-18-booster-box-24-packs": {
+  "code": "OP-18",
+  "name": "One Piece Card Game - OP-18 Booster Box (24 packs)",
+  "price": "139,99€",
+  "release": "Q4, 2026",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/413883-one-piece-card-game-premium-card-collection-live-action-edition-vol-2-straw-hat-crew": {
+  "code": null,
+  "name": "One Piece Card Game - Premium Card Collection Live Action Edition vol.2 Straw Hat Crew",
+  "price": "39,99€",
+  "release": "Q4, 2026",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/413889-one-piece-card-game-premium-card-collection-live-action-edition-vol-2-baroque-works": {
+  "code": null,
+  "name": "One Piece Card Game - Premium Card Collection Live Action Edition vol.2 Baroque Works",
+  "price": "39,99€",
+  "release": "Q4, 2026",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/413898-one-piece-card-game-eb-06-booster-box-24-packs": {
+  "code": "EB-06",
+  "name": "One Piece Card Game - EB-06 Booster Box (24 packs)",
+  "price": "139,99€",
+  "release": "Q1, 2027",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/413910-one-piece-card-game-illustration-box-ib-10": {
+  "code": "IB-10",
+  "name": "One Piece Card Game - Illustration Box IB-10",
+  "price": "39,99€",
+  "release": "Q4, 2026",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/413916-one-piece-card-game-illustration-box-ib-09": {
+  "code": "IB-09",
+  "name": "One Piece Card Game - Illustration Box IB-09",
+  "price": "39,99€",
+  "release": "Q4, 2026",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/413931-one-piece-card-game-gift-collection-2026-one-piece-heroines": {
+  "code": null,
+  "name": "One Piece Card Game - Gift Collection 2026 One Piece: Heroines",
+  "price": "59,99€",
+  "release": "Q4, 2026",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/423844-one-piece-card-game-best-selection-premium-card-collection-vol-7": {
+  "code": null,
+  "name": "One Piece Card Game - Best Selection Premium Card Collection Vol. 7",
+  "price": "49,99€",
+  "release": "Q4, 2026",
+  "status": "PREORDER_OPEN",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/423877-one-piece-card-game-best-selection-premium-card-collection-ace-sabo-luffy": {
+  "code": null,
+  "name": "One Piece Card Game - Best Selection Premium Card Collection Ace & Sabo & Luffy",
+  "price": "49,99€",
+  "release": "Q2, 2027",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/425392-one-piece-card-game-op-19-booster-box-24-packs": {
+  "code": "OP-19",
+  "name": "One Piece Card Game - OP-19 Booster Box (24 packs)",
+  "price": "139,99€",
+  "release": "Q1, 2027",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/425395-one-piece-card-game-op-20-booster-box-24-packs": {
+  "code": "OP-20",
+  "name": "One Piece Card Game - OP-20 Booster Box (24 packs)",
+  "price": "139,99€",
+  "release": "Q4, 2027",
+  "status": "SOLD_OUT",
+  "store": "eFantasy"
  }
 }
