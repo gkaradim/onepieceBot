@@ -27,7 +27,10 @@ STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 
 # Track only OP (main sets) and EB (extra boosters) BOXES - not singles, packs,
 # starter decks, double packs or illustration boxes.
-TRACK_PREFIXES = ("OP", "EB", "PRB", "DP")
+TRACK_PREFIXES = ("OP", "EB", "PRB", "DP", "IB", "TS", "DF")
+# Only these have both a "box" and a single-"pack" listing, so they need a box hint
+# to skip singles. DP/IB/TS/DF are product types on their own (no hint needed).
+BOX_REQUIRED = ("OP", "EB", "PRB")
 
 # Only English boxes: skip anything flagged as Japanese / non-English / Asia-region.
 EXCLUDE_PATTERN = re.compile(r"japanese|japan|\bjp\b|non[-\s]?english|asia[-\s]region|asian", re.I)
@@ -42,12 +45,17 @@ BOX_HINT = re.compile(r"\bbox\b|κουτ|\(24\s*(?:packs|πακ)|booster\s*box|d
 # Matches every wording of a set code, upper/lower, with/without dash/zeros/brackets:
 # OP18 OP-18 op 18 [OP18] (OP18) EB6 EB06 eb-06 ... numbers up to 999 (future-proof).
 # Nothing is hard-coded: the number is captured dynamically and normalized to NN.
-CODE_RE = re.compile(r"(?<![A-Za-z])(OP|EB|ST|PRB|DP|IB)[-\s_–—]*0*(\d{1,3})(?![0-9])", re.I)
+CODE_RE = re.compile(r"(?<![A-Za-z])(OP|EB|ST|PRB|DP|IB|TS|DF)[-\s_–—]*0*(\d{1,3})(?![0-9])", re.I)
+
+# Product-type keywords that have NO number code (matched by name, English only).
+NAME_KEYWORDS = ("premium card collection", "gift collection", "best selection")
+# Anniversary sets: track only 4th and up (e.g. "4TH ANNIVERSARY SET").
+ANNIVERSARY_RE = re.compile(r"(\d+)\s*(?:st|nd|rd|th)?\s*(?:year\s*)?anniversary", re.I)
 QUARTER_RE = re.compile(r"Q[1-4],?\s*20\d\d", re.I)
 
 # Ignore old sets: track OP only from 17 up, EB only from 06 up. (Overridden if
 # WATCH_CODES is set.) Change these numbers to widen/narrow the range.
-MIN_SET = {"OP": 17, "EB": 6, "PRB": 3, "DP": 12}
+MIN_SET = {"OP": 17, "EB": 5, "PRB": 3, "DP": 12, "IB": 9, "TS": 4, "DF": 4}
 
 # Optional: only alert for these exact codes, e.g. "OP-20,EB-06". Empty = use the
 # MIN_SET ranges above for all OP/EB boxes.
@@ -173,8 +181,14 @@ def parse_cardshive(html, base, store):
 
 STORES = [
     # eFantasy shows the whole One Piece category on a single page -> no pagination.
+    # eFantasy's CMS builds the category path from a (buggy) breadcrumb, so the
+    # prefix changes/breaks. The category ID sc-2183 is what matters. We fetch BOTH
+    # known URLs and merge, so we keep working whichever path eFantasy serves.
     {"name": "eFantasy", "parser": parse_efantasy, "paginate": False,
-     "url": "https://www.efantasy.gr/en/products/card-games/sc-2183-one-piece-card-game/sort=id-desc"},
+     "urls": [
+        "https://www.efantasy.gr/en/products/dragon-ball-super-cg/sealed/sc-2183-one-piece-card-game/sort=id-desc",
+        "https://www.efantasy.gr/en/products/card-games/sc-2183-one-piece-card-game/sort=id-desc",
+     ]},
     # WooCommerce archives split products across pages (/page/2/, /page/3/ ...),
     # so we must follow every page - the boxes can be on any of them.
     {"name": "AnimeWorld", "parser": parse_woocommerce, "paginate": True,
@@ -222,7 +236,17 @@ def scrape(store, max_pages=20):
     """Fetch a store's products. For paginated stores, follow every page until one
     brings nothing new (or 404s)."""
     if not store.get("paginate"):
-        return store["parser"](fetch(store["url"]), store["url"], store["name"])
+        items, seen = [], set()
+        for u in store.get("urls") or [store["url"]]:
+            try:
+                page = store["parser"](fetch(u), u, store["name"])
+            except Exception:
+                continue
+            for it in page:
+                if it["url"] not in seen:
+                    seen.add(it["url"])
+                    items.append(it)
+        return items
     items, seen = [], set()
     for n in range(1, max_pages + 1):
         url = page_url(store, n)
@@ -240,19 +264,30 @@ def scrape(store, max_pages=20):
 
 
 def is_tracked(item):
+    name = item["name"]
+    if EXCLUDE_PATTERN.search(name):
+        return False  # English only
     code = item["code"] or ""
-    if not code.startswith(TRACK_PREFIXES):
-        return False
-    if EXCLUDE_PATTERN.search(item["name"]):
-        return False  # English boxes only
-    if not BOX_HINT.search(item["name"]):
-        return False
+
+    # 1) Coded products (OP/EB/PRB/DP/IB/TS/DF)
+    if code.startswith(TRACK_PREFIXES):
+        if code.startswith(BOX_REQUIRED) and not BOX_HINT.search(name):
+            return False  # skip single booster packs
+        if WATCH_CODES:
+            return code in WATCH_CODES
+        prefix, _, num = code.partition("-")
+        if prefix in MIN_SET and num.isdigit() and int(num) < MIN_SET[prefix]:
+            return False  # older than the range we care about
+        return True
+
+    # 2) Name-keyword products with no number code
     if WATCH_CODES:
-        return code in WATCH_CODES
-    prefix, _, num = code.partition("-")
-    if prefix in MIN_SET and num.isdigit() and int(num) < MIN_SET[prefix]:
-        return False  # older than the range we care about
-    return True
+        return False
+    low = name.lower()
+    if any(k in low for k in NAME_KEYWORDS):
+        return True
+    m = ANNIVERSARY_RE.search(name)  # Anniversary sets: 4th and up
+    return bool(m and int(m.group(1)) >= 4)
 
 
 def load_state():
@@ -350,7 +385,7 @@ def main():
     # price-comparison map: code -> list of orderable items across all stores
     by_code = {}
     for it in all_tracked:
-        if it["status"] != SOLD_OUT:
+        if it["code"] and it["status"] != SOLD_OUT:  # coded sets only (name-keyword items compare alone)
             by_code.setdefault(it["code"], []).append(it)
 
     # Notify ONLY about available boxes. Sold-out items are recorded in the state
@@ -363,7 +398,8 @@ def main():
         emoji, label = STATUS_EMOJI.get(it["status"], ""), STATUS_GR[it["status"]]
         rel = f" — release {it['release']}" if it["release"] else ""
         just_available = old is None or old["status"] == SOLD_OUT
-        if just_available and it["code"] in notified:
+        dkey = it["code"] or it["url"]  # coded sets dedup by code; others by url
+        if just_available and dkey in notified:
             continue  # one message per set per run
 
         if old is None:
@@ -381,7 +417,7 @@ def main():
         else:
             continue
         if just_available:
-            notified.add(it["code"])
+            notified.add(dkey)
 
     for msg in messages:
         send_telegram(msg)
