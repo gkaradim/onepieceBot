@@ -1,9 +1,12 @@
 name: OP TCG stock monitor
 
 on:
-  schedule:
-    - cron: "*/20 * * * *"  
-  workflow_dispatch:
+  # Το προγραμματισμένο τρέξιμο έρχεται από εξωτερικό pinger (cron-job.org) κάθε
+  # 15 λεπτά, μέσω workflow_dispatch (GitHub API). Το εσωτερικό cron του GitHub
+  # είναι αναξιόπιστο (ρίχνει/καθυστερεί runs), γι' αυτό το αφήσαμε σε comment.
+  # schedule:
+  #   - cron: "*/20 * * * *"
+  workflow_dispatch:          # trigger από cron-job.org (και χειροκίνητα από Actions)
 
 permissions:
   contents: write
