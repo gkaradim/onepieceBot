@@ -27,13 +27,16 @@ STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 
 # Track only OP (main sets) and EB (extra boosters) BOXES - not singles, packs,
 # starter decks, double packs or illustration boxes.
-TRACK_PREFIXES = ("OP", "EB", "PRB", "DP", "IB", "TS", "DF")
+TRACK_PREFIXES = ("OP", "EB", "PRB", "PEB", "DP", "IB", "TS", "DF")
 # Only these have both a "box" and a single-"pack" listing, so they need a box hint
 # to skip singles. DP/IB/TS/DF are product types on their own (no hint needed).
-BOX_REQUIRED = ("OP", "EB", "PRB")
+BOX_REQUIRED = ("OP", "EB", "PRB", "PEB")
 
 # Only English boxes: skip anything flagged as Japanese / non-English / Asia-region.
-EXCLUDE_PATTERN = re.compile(r"japanese|japan|\bjp\b|non[-\s]?english|asia[-\s]region|asian", re.I)
+EXCLUDE_PATTERN = re.compile(
+    r"japanese|japan|\bjp\b|non[-\s]?english|asia[-\s]region|asian|chinese|korean"
+    r"|ιαπωνικ|κιν[εέ]ζικ|κορε[αά]τικ",  # Greek: Ιαπωνικά/Κινέζικο/Κορεάτικο
+    re.I)
 
 # A tracked product's name must contain one of these "box" hints. Stores word it
 # very differently, so we cover them all (incl. Greek "Κουτί"):
@@ -45,7 +48,7 @@ BOX_HINT = re.compile(r"\bbox\b|κουτ|\(24\s*(?:packs|πακ)|booster\s*box|d
 # Matches every wording of a set code, upper/lower, with/without dash/zeros/brackets:
 # OP18 OP-18 op 18 [OP18] (OP18) EB6 EB06 eb-06 ... numbers up to 999 (future-proof).
 # Nothing is hard-coded: the number is captured dynamically and normalized to NN.
-CODE_RE = re.compile(r"(?<![A-Za-z])(OP|EB|ST|PRB|DP|IB|TS|DF)[-\s_–—]*0*(\d{1,3})(?![0-9])", re.I)
+CODE_RE = re.compile(r"(?<![A-Za-z])(OP|EB|ST|PRB|PEB|DP|IB|TS|DF)[-\s_–—]*0*(\d{1,3})(?![0-9])", re.I)
 
 # Product-type keywords that have NO number code (matched by name, English only).
 NAME_KEYWORDS = ("premium card collection", "gift collection", "best selection")
@@ -55,7 +58,7 @@ QUARTER_RE = re.compile(r"Q[1-4],?\s*20\d\d", re.I)
 
 # Ignore old sets: track OP only from 17 up, EB only from 06 up. (Overridden if
 # WATCH_CODES is set.) Change these numbers to widen/narrow the range.
-MIN_SET = {"OP": 17, "EB": 5, "PRB": 3, "DP": 12, "IB": 9, "TS": 4, "DF": 4}
+MIN_SET = {"OP": 17, "EB": 5, "PRB": 3, "PEB": 1, "DP": 12, "IB": 9, "TS": 4, "DF": 4}
 
 # Optional: only alert for these exact codes, e.g. "OP-20,EB-06". Empty = use the
 # MIN_SET ranges above for all OP/EB boxes.
