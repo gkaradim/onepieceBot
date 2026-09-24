@@ -253,10 +253,16 @@ def scrape(store, max_pages=20):
     items, seen = [], set()
     for n in range(1, max_pages + 1):
         url = page_url(store, n)
-        try:
-            page = store["parser"](fetch(url), url, store["name"])
-        except Exception:
-            break  # 404 past the last page
+        headers = {"Accept-Language": "el-GR,el;q=0.9,en;q=0.8",
+                   "Referer": urllib.parse.urljoin(url, "/")}
+        r = cf.get(url, headers=headers, impersonate="chrome", timeout=40)
+        if r.status_code == 404:
+            break  # genuinely past the last page - stop, keep what we have
+        r.raise_for_status()  # any other failure (timeout/5xx/etc) must propagate,
+        # NOT be swallowed as "end of pages" - a transient hiccup here would
+        # otherwise silently truncate the list and make untouched products look
+        # "new" again next run, causing false re-notifications.
+        page = store["parser"](r.text, url, store["name"])
         new = [it for it in page if it["url"] not in seen]
         if not new:
             break  # empty page or redirected back to page 1
