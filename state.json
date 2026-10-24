@@ -71,6 +71,22 @@
   "status": "SOLD_OUT",
   "store": "MythicVault"
  },
+ "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-op16-the-time-of-battle-booster-box-24-packs-copy-3/": {
+  "code": "OP-18",
+  "name": "One Piece Card Game – OP18 The Dominance of God Booster Box (24 Packs)",
+  "price": "149,99 €",
+  "release": "",
+  "status": "IN_STOCK",
+  "store": "MythicVault"
+ },
+ "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-op18-the-dominance-of-god-booster-box-24-packs-copy/": {
+  "code": "OP-18",
+  "name": "One Piece Card Game – OP18 The Dominance of God Booster Box (24 Packs) (Copy)",
+  "price": "169,99 €",
+  "release": "",
+  "status": "IN_STOCK",
+  "store": "MythicVault"
+ },
  "https://www.cardshive.gr/tcg/tcg-boxes/one-piece-boxes/one-piece-op17-the-worlds-strongest-warriors-booster-box": {
   "code": "OP-17",
   "name": "One Piece OP17 - The World's Strongest Warriors Booster Box",
