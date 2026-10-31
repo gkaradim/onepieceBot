@@ -62,5 +62,21 @@
   "release": "Q1, 2027",
   "status": "PREORDER_OPEN",
   "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/425395-one-piece-card-game-op-20-booster-box-24-packs": {
+  "code": "OP-20",
+  "name": "One Piece Card Game - OP-20 Booster Box (24 packs)",
+  "price": "143,99€",
+  "release": "Q2, 2027",
+  "status": "PREORDER_OPEN",
+  "store": "eFantasy"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/432530-one-piece-card-game-op-21-booster-box-24-packs": {
+  "code": "OP-21",
+  "name": "One Piece Card Game - OP-21 Booster Box (24 packs)",
+  "price": "167,99€",
+  "release": "Q3, 2027",
+  "status": "PREORDER_OPEN",
+  "store": "eFantasy"
  }
 }
