@@ -54,5 +54,13 @@
   "release": "",
   "status": "IN_STOCK",
   "store": "CardsHive"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/430748-one-piece-card-game-peb-01-premium-extra-booster-booster-box-12-packs": {
+  "code": "PEB-01",
+  "name": "One Piece Card Game - PEB-01 Premium Extra Booster Booster Box (12 packs)",
+  "price": "179,99€",
+  "release": "Q3, 2027",
+  "status": "PREORDER_OPEN",
+  "store": "eFantasy"
  }
 }
