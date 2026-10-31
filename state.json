@@ -54,5 +54,13 @@
   "release": "",
   "status": "IN_STOCK",
   "store": "CardsHive"
+ },
+ "https://www.efantasy.gr/en/products/dragon-ball-super/425392-one-piece-card-game-op-19-booster-box-24-packs": {
+  "code": "OP-19",
+  "name": "One Piece Card Game - OP-19 Booster Box (24 packs)",
+  "price": "143,99€",
+  "release": "Q1, 2027",
+  "status": "PREORDER_OPEN",
+  "store": "eFantasy"
  }
 }
