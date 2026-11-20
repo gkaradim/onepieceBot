@@ -15,6 +15,14 @@
   "status": "SOLD_OUT",
   "store": "MythicVault"
  },
+ "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-double-pack-dp12-en-copy/": {
+  "code": "DP-13",
+  "name": "One Piece Card Game Double Pack DP13 – EN",
+  "price": "24,90 €",
+  "release": "",
+  "status": "IN_STOCK",
+  "store": "MythicVault"
+ },
  "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-op16-the-time-of-battle-booster-box-24-packs-copy-2/": {
   "code": "OP-17",
   "name": "One Piece Card Game – The World’s Strongest Warriors OP17 Booster Box (24 Packs)",
@@ -28,7 +36,7 @@
   "name": "One Piece Card Game – OP18 The Dominance of God Booster Box (24 Packs)",
   "price": "149,99 €",
   "release": "",
-  "status": "SOLD_OUT",
+  "status": "IN_STOCK",
   "store": "MythicVault"
  },
  "https://mythicvault.com/el/shop/trading-card-games-el/one-piece-card-game-op18-the-dominance-of-god-booster-box-24-packs-copy/": {
