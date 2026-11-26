@@ -67,7 +67,7 @@
   "code": "OP-18",
   "name": "One Piece Card Game - OP-18 Booster Box (24 packs)",
   "price": "139,99€",
-  "release": "Q4, 2026",
+  "release": "",
   "status": "SOLD_OUT",
   "store": "eFantasy"
  },
@@ -75,16 +75,16 @@
   "code": null,
   "name": "One Piece Card Game - Premium Card Collection Live Action Edition vol.2 Straw Hat Crew",
   "price": "44,99€",
-  "release": "Q4, 2026",
-  "status": "PREORDER_OPEN",
+  "release": "",
+  "status": "IN_STOCK",
   "store": "eFantasy"
  },
  "https://www.efantasy.gr/en/products/dragon-ball-super/413889-one-piece-card-game-premium-card-collection-live-action-edition-vol-2-baroque-works": {
   "code": null,
   "name": "One Piece Card Game - Premium Card Collection Live Action Edition vol.2 Baroque Works",
   "price": "34,99€",
-  "release": "Q4, 2026",
-  "status": "PREORDER_OPEN",
+  "release": "",
+  "status": "IN_STOCK",
   "store": "eFantasy"
  }
 }
